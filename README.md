@@ -38,9 +38,9 @@ A lightweight Python GUI tool for developers that creates AI context prompts by 
 
 1. **Run the Script:**
    ```bash
-   python your_script_name.py
+   python AI-context-builder-pro.py
    ```
-   Replace `your_script_name.py` with the actual filename.
+   Replace `AI-context-builder-pro.py` with the actual filename.
 
 2. **Connect to Supabase:**
    - When the GUI opens, enter your Supabase host, port, database, user, and password.
