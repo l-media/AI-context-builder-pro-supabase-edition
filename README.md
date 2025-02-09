@@ -60,3 +60,8 @@ A lightweight Python GUI tool for developers that creates AI context prompts by 
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
+## Contact
+
+Contact at: [Lince Media](https://lince.media/)
+
