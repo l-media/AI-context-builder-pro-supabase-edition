@@ -1,9 +1,9 @@
 # AI Context Builder Pro – Supabase Edition  
-**The Ultimate Repo Prompt Windows Alternative**  
+**The Ultimate Repo Prompt Alternative for Windows, Mac, and Linux**  
 
 A **lightweight** and **open-source** Python GUI tool that helps developers generate AI context prompts by **merging code files, project structure, and Supabase database exports** into a single output file.  
 
-If you're looking for a **Repo Prompt Windows Alternative** or an **open-source Repo Prompt killer**, this tool is designed to simplify your workflow while keeping full control over your AI-driven projects.  
+If you're looking for a **Repo Prompt Windows alternative** or an **open-source solution** to manage your AI context generation, this tool is designed to streamline your workflow with complete control over your AI-driven projects.  
 
 📌 **Repository:** [github.com/l-media/AI-context-builder-pro-supabase-edition](https://github.com/l-media/AI-context-builder-pro-supabase-edition)
 
@@ -36,15 +36,15 @@ If you're looking for a **Repo Prompt Windows Alternative** or an **open-source 
 
 ---
 
-## 🚀 Why Use This Over Repo Prompt?
+## 🚀 Why Use This Tool?
 
-If you're searching for a **Repo Prompt Windows Alternative** or a **Repo Prompt open-source alternative**, this tool is perfect for:  
+If you're searching for a **Repo Prompt Windows alternative** or an **open-source tool** to generate AI context, this software is perfect for:  
 
 - Developers who need **AI context generation** but want more control over **file selection and database prompts**.  
 - Users who want **lightweight, local-first software** without relying on proprietary tools.  
-- Anyone who prefers an **open-source Repo Prompt killer** that **works seamlessly on Linux, macOS, and Windows**.  
+- Anyone who prefers an **open-source alternative** to manage their AI projects seamlessly on Linux, macOS, and Windows.  
 
-Unlike other AI context-building tools, **this is fully customizable** and does **not lock you into a specific format or AI model**.  
+Unlike other tools, **this is fully customizable** and does **not lock you into a specific format or AI model**.  
 
 ---
 
@@ -106,7 +106,7 @@ python AI-context-builder-pro.py
 - **Improved:** Supabase **database prompt format**, removing unnecessary text.  
 - **Improved:** No unnecessary **"Selected Prompts"** header in the output.  
 
-If you've been searching for the **best Repo Prompt Windows Alternative**, this release makes the tool even better. 🚀  
+This release makes the tool even more powerful and flexible for developers looking for an open-source solution to manage AI context generation. 🚀  
 
 ---
 
@@ -117,8 +117,3 @@ This project is licensed under the [MIT License](LICENSE).
 ## 💬 Contact
 
 Contact us at: [Lince Media](https://lince.media/)  
-
----
-
-💡 **Looking for a Repo Prompt killer?**  
-This open-source alternative to Repo Prompt is built for flexibility and **full control over your AI context generation**.  
