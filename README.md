@@ -1,67 +1,124 @@
-# AI Context Builder Pro – Supabase Edition
+# AI Context Builder Pro – Supabase Edition  
+**The Ultimate Repo Prompt Windows Alternative**  
 
-A lightweight Python GUI tool for developers that creates AI context prompts by merging your project’s code files, directory structure, and Supabase (PostgreSQL) table exports—all in one output file.  
-**Repository:** [github.com/l-media/AI-context-builder-pro-supabase-edition](https://github.com/l-media/AI-context-builder-pro-supabase-edition)
+A **lightweight** and **open-source** Python GUI tool that helps developers generate AI context prompts by **merging code files, project structure, and Supabase database exports** into a single output file.  
 
-## Features
+If you're looking for a **Repo Prompt Windows Alternative** or an **open-source Repo Prompt killer**, this tool is designed to simplify your workflow while keeping full control over your AI-driven projects.  
 
-- **Supabase Integration:**  
-  Connect to your Supabase database and export selected tables (both schema and data) as JSON.
-- **Code & Directory Context:**  
-  Browse and select code files and folders from your project to include essential context.
-- **Prompt Builder:**  
-  Combine exported database data with custom text prompts for comprehensive AI context.
-- **Secure Credentials:**  
-  Stores your Supabase connection details locally in `supabase_config.local` (remember to add this file to your `.gitignore`).
+📌 **Repository:** [github.com/l-media/AI-context-builder-pro-supabase-edition](https://github.com/l-media/AI-context-builder-pro-supabase-edition)
 
-## Prerequisites
+---
+
+## 🔥 Features
+
+✅ **Supabase Database Export**  
+   - Connect to your **Supabase** database.  
+   - Select specific tables and export both **schema** and **data** in JSON format.  
+   - The tool automatically generates a Supabase-aware prompt to enhance AI context.  
+
+✅ **Project Directory & Code Context**  
+   - **Browse and select** specific code files and directories from your project.  
+   - The interface automatically excludes unnecessary folders like `node_modules` and `.next`.  
+
+✅ **Advanced Prompt Builder**  
+   - Add and manage custom **pre-saved prompts** from the `prompts/` folder.  
+   - The AI context will **combine database exports, project structure, and your selected prompts** in an optimized way.  
+
+✅ **Full Control Over Output**  
+   - Generates an `output.txt` file with:  
+     - **Directory tree structure**  
+     - **Important code files**  
+     - **Selected Supabase database information**  
+   - No forced formatting—use it however you want for AI integrations.  
+
+✅ **Secure Credentials Management**  
+   - Saves your Supabase connection details locally in `supabase_config.local` (Make sure to **add this file to `.gitignore`** to keep it private).  
+
+---
+
+## 🚀 Why Use This Over Repo Prompt?
+
+If you're searching for a **Repo Prompt Windows Alternative** or a **Repo Prompt open-source alternative**, this tool is perfect for:  
+
+- Developers who need **AI context generation** but want more control over **file selection and database prompts**.  
+- Users who want **lightweight, local-first software** without relying on proprietary tools.  
+- Anyone who prefers an **open-source Repo Prompt killer** that **works seamlessly on Linux, macOS, and Windows**.  
+
+Unlike other AI context-building tools, **this is fully customizable** and does **not lock you into a specific format or AI model**.  
+
+---
+
+## 📌 Prerequisites
 
 - **Python 3.6+**
-- **psycopg2-binary**  
+- **psycopg2-binary** (for Supabase integration)  
   Install via:
   ```bash
   pip install psycopg2-binary
   ```
 
-## Installation
+---
 
-1. **Clone the Repository:**
-   ```bash
-   git clone https://github.com/l-media/AI-context-builder-pro-supabase-edition.git
-   cd AI-context-builder-pro-supabase-edition
-   ```
+## 🔧 Installation
 
-2. **Secure Your Credentials:**
-   Add `supabase_config.local` to your `.gitignore` to keep your Supabase config safe.
+1️⃣ **Clone the Repository**  
+```bash
+git clone https://github.com/l-media/AI-context-builder-pro-supabase-edition.git
+cd AI-context-builder-pro-supabase-edition
+```
 
-## Usage
+2️⃣ **Secure Your Credentials**  
+   - Add `supabase_config.local` to your `.gitignore` file to **keep your Supabase credentials private**.  
 
-1. **Run the Script:**
-   ```bash
-   python AI-context-builder-pro.py
-   ```
-   Replace `AI-context-builder-pro.py` with the actual filename.
+---
 
-2. **Connect to Supabase:**
-   - When the GUI opens, enter your Supabase host, port, database, user, and password.
-   - Click **Connect** to fetch available tables.
-   - Optionally, select and export tables to generate a custom prompt from the JSON export.
+## 🖥️ Usage Guide
 
-3. **Select Code Files & Prompts:**
-   - Use the interface to check which code files and directories you want to include.
-   - Manage preset prompts from the `prompts/` folder to further tailor your AI context.
+### 1️⃣ Run the GUI  
+```bash
+python AI-context-builder-pro.py
+```
+*(Replace `AI-context-builder-pro.py` with the actual filename if different.)*  
 
-4. **Generate Output:**
-   - Click **Generate Output** to create an `output.txt` file that merges:
-     - Supabase export prompt (if selected)
-     - Your project’s directory structure
-     - The contents of chosen code files
+### 2️⃣ Connect to Supabase  
+   - Enter your **Supabase Host, Port, Database, User, and Password**.  
+   - Click **Connect** to fetch your database schema and tables.  
+   - Select the tables you want to export and include them in the AI context.  
 
-## License
+### 3️⃣ Select Code Files & Prompts  
+   - **Click on files and directories** in the GUI to **add** or **exclude** them.  
+   - Clicking an item again will **toggle its selection/exclusion**.  
+   - Use the **"Clear All"** button to reset all choices instantly.  
 
-This project is licensed under the [MIT License](LICENSE).
+### 4️⃣ Generate Your AI Context  
+   - Click **"Generate Output"** and get an `output.txt` file containing:  
+     - **Supabase export (if selected)**  
+     - **Directory tree structure**  
+     - **Selected code files and content**  
 
-## Contact
+---
 
-Contact at: [Lince Media](https://lince.media/)
+## 🎯 Key Improvements in This Version  
 
+- **NEW:** Toggle selection/exclusion for files & folders by clicking again.  
+- **NEW:** Compact **"Name" column** to keep **Add Code** and **Exclude** buttons closer for better usability.  
+- **NEW:** "Clear All" button to **reset all selections** instantly.  
+- **Improved:** Supabase **database prompt format**, removing unnecessary text.  
+- **Improved:** No unnecessary **"Selected Prompts"** header in the output.  
+
+If you've been searching for the **best Repo Prompt Windows Alternative**, this release makes the tool even better. 🚀  
+
+---
+
+## ⚖️ License
+
+This project is licensed under the [MIT License](LICENSE).  
+
+## 💬 Contact
+
+Contact us at: [Lince Media](https://lince.media/)  
+
+---
+
+💡 **Looking for a Repo Prompt killer?**  
+This open-source alternative to Repo Prompt is built for flexibility and **full control over your AI context generation**.  
