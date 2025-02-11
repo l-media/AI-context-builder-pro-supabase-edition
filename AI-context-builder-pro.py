@@ -9,9 +9,9 @@ import psycopg2.extras
 EXCLUDE_DIRS = {'node_modules', '.next', 'prompts'}
 SUPABASE_CONFIG_FILENAME = "supabase_config.local"
 
-# -----------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 # Supabase config helpers
-# -----------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 def load_supabase_config(base_path):
     config_file = os.path.join(base_path, SUPABASE_CONFIG_FILENAME)
     if os.path.exists(config_file):
@@ -31,9 +31,9 @@ def save_supabase_config(base_path, config):
     except Exception as e:
         print("Failed to save supabase_config.local:", e)
 
-# -----------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 # Generate a directory tree string with exclusions
-# -----------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 def get_directory_tree(base_path, excluded_paths):
     tree_str = ""
     excluded_paths = {os.path.normpath(p) for p in excluded_paths}
@@ -63,9 +63,9 @@ def get_directory_tree(base_path, excluded_paths):
             tree_str += f"{subindent}{f}\n"
     return tree_str
 
-# -----------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 # Supabase Dialog
-# -----------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 class SupabaseDialog(tk.Toplevel):
     def __init__(self, parent, base_path):
         super().__init__(parent)
@@ -135,10 +135,19 @@ class SupabaseDialog(tk.Toplevel):
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.tables_listbox.config(yscrollcommand=scrollbar.set)
         
-        # Export tables button
-        self.export_button = ttk.Button(self, text="Export Selected Tables", command=self.export_tables, state=tk.DISABLED)
-        self.export_button.pack(pady=5)
-        
+        # Frame for Export + Skip
+        bottom_buttons_frame = ttk.Frame(self)
+        bottom_buttons_frame.pack(pady=5)
+
+        self.export_button = ttk.Button(
+            bottom_buttons_frame, text="Export Selected Tables", command=self.export_tables, state=tk.DISABLED
+        )
+        self.export_button.grid(row=0, column=0, padx=5)
+
+        # "Skip" button
+        skip_button = ttk.Button(bottom_buttons_frame, text="Skip", command=self.destroy)
+        skip_button.grid(row=0, column=1, padx=5)
+
         # Proceed button
         self.proceed_button = ttk.Button(self, text="Proceed", command=self.destroy)
         self.proceed_button.pack(pady=5)
@@ -239,9 +248,9 @@ class SupabaseDialog(tk.Toplevel):
             messagebox.showerror("Export Error", str(e))
             self.destroy()
 
-# -----------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 # Main File Selection / AI Context Builder GUI
-# -----------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 class FileSelectorGUI(tk.Tk):
     def __init__(self, base_path):
         super().__init__()
@@ -262,6 +271,11 @@ class FileSelectorGUI(tk.Tk):
 
         self.context_file = os.path.join(self.base_path, 'ai_context.config')
 
+        # Optional: style for row lines
+        style = ttk.Style(self)
+        style.configure("Treeview", rowheight=22, bordercolor="black", relief="solid")
+        style.map("Treeview", background=[("selected", "#cceeff")])
+
         self.setup_gui()
         self.load_all_file_tokens()
         self.setup_prompts_frame()
@@ -269,49 +283,57 @@ class FileSelectorGUI(tk.Tk):
 
         self.insert_root_node()
 
-        # Open the Supabase dialog after everything loads
+        # Open Supabase dialog
         self.after(100, self.open_supabase_dialog)
 
-    # -------------------------------------------------------------------------
-    # Setup Treeview with multi-columns
-    # -------------------------------------------------------------------------
+    # ----------------------------------------------------------------------
+    # Setup the Treeview
+    # ----------------------------------------------------------------------
     def setup_gui(self):
-        # We'll add columns for "Add Code" (#1) and "Exclude" (#2).
+        # Place the tree in a frame with scrollbars
+        tree_frame = ttk.Frame(self)
+        tree_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
         self.tree = ttk.Treeview(
-            self,
+            tree_frame,
             columns=("add_code", "exclude"),
-            show="tree headings",
+            show="tree headings"
         )
 
-        # Define headings
-        self.tree.heading("#0", text="Name", anchor="w")   # The tree itself
+        # Column #0: Name
+        self.tree.heading("#0", text="Name", anchor="w")
+        self.tree.column("#0", minwidth=180, width=300, stretch=True)
+
+        # Add code column
         self.tree.heading("add_code", text="Add Code", anchor="center")
+        self.tree.column("add_code", width=80, anchor="center", stretch=False)
+
+        # Exclude column
         self.tree.heading("exclude", text="Exclude", anchor="center")
+        self.tree.column("exclude", width=80, anchor="center", stretch=False)
 
-        # Adjust the Name column to be more compact (while still stretchable)
-        self.tree.column("#0", minwidth=200, width=200, stretch=True)
-        self.tree.column("add_code", width=90, anchor="center", stretch=False)
-        self.tree.column("exclude", width=90, anchor="center", stretch=False)
-
-        # Add vertical scrollbar
-        yscroll = ttk.Scrollbar(self, orient="vertical", command=self.tree.yview)
+        # Vertical scrollbar
+        yscroll = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscroll=yscroll.set)
         yscroll.pack(side=tk.RIGHT, fill=tk.Y)
 
+        # Horizontal scrollbar (optional)
+        xscroll = ttk.Scrollbar(tree_frame, orient="horizontal", command=self.tree.xview)
+        self.tree.configure(xscrollcommand=xscroll.set)
+        xscroll.pack(side=tk.BOTTOM, fill=tk.X)
+
         self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        # Bind expand for lazy loading
+        # Bind events
         self.tree.bind("<<TreeviewOpen>>", self.on_tree_expand)
-
-        # Single-click to handle "Add Code" or "Exclude" column clicks
         self.tree.bind("<Button-1>", self.on_tree_click)
 
-        # Configure color tags
+        # Tags for color
         self.tree.tag_configure("excluded", foreground="red")
         self.tree.tag_configure("selected", foreground="green")
         self.tree.tag_configure("normal", foreground="black")
 
-        # Bottom control frame for general actions
+        # Control frame
         self.control_frame = ttk.Frame(self)
         self.control_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=5)
 
@@ -322,13 +344,9 @@ class FileSelectorGUI(tk.Tk):
         ttk.Button(self.control_frame, text="Save Configuration", command=self.save_configuration).pack(side=tk.LEFT, padx=5)
         ttk.Button(self.control_frame, text="Load Configuration", command=self.load_configuration).pack(side=tk.LEFT, padx=5)
 
-        # "Clear all" button to reset any selection/exclusion
         ttk.Button(self.control_frame, text="Clear all", command=self.clear_all).pack(side=tk.LEFT, padx=5)
 
     def load_all_file_tokens(self):
-        """
-        Precompute token counts for all files under base_path (except this script).
-        """
         try:
             script_name = os.path.basename(__file__)
         except NameError:
@@ -348,9 +366,9 @@ class FileSelectorGUI(tk.Tk):
                 except Exception:
                     self.file_token_counts[full_path] = 0
 
-    # -------------------------------------------------------------------------
-    # Prompts frame
-    # -------------------------------------------------------------------------
+    # ----------------------------------------------------------------------
+    # Prompts
+    # ----------------------------------------------------------------------
     def setup_prompts_frame(self):
         self.prompts_frame = ttk.LabelFrame(self, text="Presaved Prompts")
         self.prompts_frame.pack(fill=tk.X, padx=10, pady=10, side=tk.TOP)
@@ -396,9 +414,9 @@ class FileSelectorGUI(tk.Tk):
         for fname in sorted(self.prompts_data.keys()):
             self.available_prompts_box.insert(tk.END, fname)
 
-    # -------------------------------------------------------------------------
-    # Building the Tree
-    # -------------------------------------------------------------------------
+    # ----------------------------------------------------------------------
+    # Build the Tree (with lazy loading)
+    # ----------------------------------------------------------------------
     def insert_root_node(self):
         base_abs = os.path.abspath(self.base_path)
         display_name = os.path.basename(base_abs) or base_abs
@@ -414,10 +432,11 @@ class FileSelectorGUI(tk.Tk):
         self.exclusion_vars[base_abs] = tk.BooleanVar(value=False)
         self.dir_vars[base_abs] = tk.BooleanVar(value=False)
 
-        # Add a dummy child for lazy expansion
+        # Add a dummy child
         self.tree.insert(item_id, "end", text="...")
 
     def on_tree_expand(self, event):
+        """When the user manually expands a node, we load its children (lazy load)."""
         item_id = self.tree.focus()
         if not item_id:
             return
@@ -432,7 +451,7 @@ class FileSelectorGUI(tk.Tk):
                 self.tree.delete(dummy)
                 self.insert_children(item_id, path)
 
-        # If parent is excluded or selected, propagate that.
+        # If parent is excluded or selected, propagate that
         if self.exclusion_vars.get(path, tk.BooleanVar()).get():
             self.propagate_exclusion(path, True)
         else:
@@ -442,6 +461,7 @@ class FileSelectorGUI(tk.Tk):
         self.refresh_subtree(item_id)
 
     def insert_children(self, parent_item, parent_path):
+        """Inserts actual child dirs/files for a given directory, if they aren't excluded."""
         try:
             with os.scandir(parent_path) as entries:
                 dirs = []
@@ -471,7 +491,7 @@ class FileSelectorGUI(tk.Tk):
                 self.exclusion_vars.setdefault(full_path, tk.BooleanVar(value=False))
                 self.dir_vars.setdefault(full_path, tk.BooleanVar(value=False))
 
-                # Add a dummy child
+                # Add a dummy child so we can lazy-load its children
                 self.tree.insert(iid, "end", text="...")
 
                 self.update_item_appearance(iid, full_path)
@@ -495,9 +515,46 @@ class FileSelectorGUI(tk.Tk):
         except PermissionError:
             pass
 
-    # -------------------------------------------------------------------------
-    # Handle clicks on "Add Code" or "Exclude" columns (with toggling)
-    # -------------------------------------------------------------------------
+    # ----------------------------------------------------------------------
+    # Expand only one level: the root directory and its immediate children
+    # ----------------------------------------------------------------------
+    def expand_root_one_level(self):
+        """
+        Expand the root folder node and load its children,
+        then for each direct child folder, load their children
+        but do not expand the grandchildren further.
+        """
+        root_items = self.tree.get_children("")
+        for item_id in root_items:
+            # Expand the root item itself
+            self.tree.item(item_id, open=True)
+            path = self.tree_item_map.get(item_id)
+            if path:
+                # If the root has a dummy child, remove it and insert real children
+                kids = self.tree.get_children(item_id)
+                if len(kids) == 1:
+                    dummy_id = kids[0]
+                    if self.tree.item(dummy_id, "text") == "...":
+                        self.tree.delete(dummy_id)
+                        self.insert_children(item_id, path)
+                # Now open each immediate child folder (just enough to see one level deeper)
+                child_items = self.tree.get_children(item_id)
+                for cid in child_items:
+                    cpath = self.tree_item_map.get(cid)
+                    if not cpath:
+                        continue
+                    if os.path.isdir(cpath):
+                        # Expand this child folder to load its sub-children (one more level).
+                        self.tree.item(cid, open=True)
+                        # If that child folder has a dummy child, remove it
+                        cc = self.tree.get_children(cid)
+                        if len(cc) == 1 and self.tree.item(cc[0], "text") == "...":
+                            self.tree.delete(cc[0])
+                            self.insert_children(cid, cpath)
+
+    # ----------------------------------------------------------------------
+    # Single-click toggles
+    # ----------------------------------------------------------------------
     def on_tree_click(self, event):
         col_str = self.tree.identify_column(event.x)  # "#0", "#1", "#2", ...
         item_id = self.tree.identify_row(event.y)
@@ -508,12 +565,11 @@ class FileSelectorGUI(tk.Tk):
         if not path:
             return
 
+        # #1 => add_code, #2 => exclude, #0 => Name
         if col_str == "#1":
-            # User clicked the "Add Code" column => toggle
             self.handle_add_code(path)
             self.refresh_subtree(item_id)
         elif col_str == "#2":
-            # User clicked the "Exclude" column => toggle
             self.handle_exclude(path)
             self.refresh_subtree(item_id)
 
@@ -521,48 +577,42 @@ class FileSelectorGUI(tk.Tk):
 
     def handle_add_code(self, path):
         """Toggle between selected/unselected (also clears exclusion)."""
-        currently_excluded = self.exclusion_vars[path].get()
         if os.path.isdir(path):
             currently_selected = self.dir_vars[path].get()
             if currently_selected:
-                # Unselect directory (no exclusion)
                 self.dir_vars[path].set(False)
                 self.propagate_selection(path, False)
             else:
-                # Select directory, remove exclusion
                 self.exclusion_vars[path].set(False)
                 self.dir_vars[path].set(True)
                 self.propagate_selection(path, True)
         else:
-            # It's a file
             currently_selected = self.file_vars[path].get()
             if currently_selected:
-                # Unselect file
                 self.file_vars[path].set(False)
             else:
-                # Select file, remove exclusion
                 self.exclusion_vars[path].set(False)
                 self.file_vars[path].set(True)
 
     def handle_exclude(self, path):
-        """Toggle between excluded/not-excluded (also unselect it if excluded)."""
+        """Toggle between excluded/not-excluded (also unselect if excluded)."""
         currently_excluded = self.exclusion_vars[path].get()
         self.propagate_exclusion(path, not currently_excluded)
 
-    # -------------------------------------------------------------------------
+    # ----------------------------------------------------------------------
     # Propagation & Refresh
-    # -------------------------------------------------------------------------
+    # ----------------------------------------------------------------------
     def propagate_exclusion(self, path, new_state):
-        """Exclude/unexclude path, recursively affecting children."""
         self.exclusion_vars[path].set(new_state)
         if os.path.isdir(path):
-            self.dir_vars[path].set(False if new_state else self.dir_vars[path].get())
+            if new_state:
+                self.dir_vars[path].set(False)
             for root, dirs, files in os.walk(path, topdown=True):
                 dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS]
                 for d in dirs:
                     fp = os.path.join(root, d)
                     self.exclusion_vars.setdefault(fp, tk.BooleanVar(value=False)).set(new_state)
-                    self.dir_vars.setdefault(fp, tk.BooleanVar(value=False)).set(False if new_state else self.dir_vars[fp].get())
+                    self.dir_vars.setdefault(fp, tk.BooleanVar(value=False)).set(False)
                 for f in files:
                     fp = os.path.join(root, f)
                     self.exclusion_vars.setdefault(fp, tk.BooleanVar(value=False)).set(new_state)
@@ -571,7 +621,6 @@ class FileSelectorGUI(tk.Tk):
             self.file_vars[path].set(False)
 
     def propagate_selection(self, path, new_state):
-        """Select/unselect a directory recursively, clearing any exclusions."""
         if os.path.isdir(path):
             self.dir_vars[path].set(new_state)
             self.exclusion_vars[path].set(False)
@@ -590,7 +639,6 @@ class FileSelectorGUI(tk.Tk):
             self.exclusion_vars[path].set(False)
 
     def refresh_subtree(self, item_id):
-        """Recursively update appearance of item + children."""
         path = self.tree_item_map.get(item_id)
         if path:
             self.update_item_appearance(item_id, path)
@@ -606,7 +654,7 @@ class FileSelectorGUI(tk.Tk):
 
         if excluded:
             color_tag = "excluded"
-            add_code_text = "Add"   # Let user re-add even if excluded
+            add_code_text = "Add"
             exclude_text = "X"
         else:
             if selected:
@@ -622,9 +670,9 @@ class FileSelectorGUI(tk.Tk):
         self.tree.set(item_id, "add_code", add_code_text)
         self.tree.set(item_id, "exclude", exclude_text)
 
-    # -------------------------------------------------------------------------
+    # ----------------------------------------------------------------------
     # Query states
-    # -------------------------------------------------------------------------
+    # ----------------------------------------------------------------------
     @property
     def excluded_paths(self):
         return {p for p, var in self.exclusion_vars.items() if var.get()}
@@ -636,11 +684,11 @@ class FileSelectorGUI(tk.Tk):
             if var.get() and not self.exclusion_vars[p].get()
         )
 
-    # -------------------------------------------------------------------------
+    # ----------------------------------------------------------------------
     # Clear all
-    # -------------------------------------------------------------------------
+    # ----------------------------------------------------------------------
     def clear_all(self):
-        """Resets all selections and exclusions."""
+        """Resets all selections, exclusions, and prompts."""
         for p in self.exclusion_vars:
             self.exclusion_vars[p].set(False)
         for p in self.dir_vars:
@@ -648,14 +696,22 @@ class FileSelectorGUI(tk.Tk):
         for p in self.file_vars:
             self.file_vars[p].set(False)
 
-        # Refresh the visible portion of the tree
+        self.selected_prompts_box.delete(0, tk.END)
+        self.available_prompts_box.delete(0, tk.END)
+
+        # Repopulate "available" from self.prompts_data
+        for fname in sorted(self.prompts_data.keys()):
+            self.available_prompts_box.insert(tk.END, fname)
+
+        # Refresh the visible portion
         for item_id in self.tree.get_children():
             self.refresh_subtree(item_id)
+
         self.update_token_count()
 
-    # -------------------------------------------------------------------------
+    # ----------------------------------------------------------------------
     # Supabase integration
-    # -------------------------------------------------------------------------
+    # ----------------------------------------------------------------------
     def open_supabase_dialog(self):
         dialog = SupabaseDialog(self, self.base_path)
         self.wait_window(dialog)
@@ -664,14 +720,15 @@ class FileSelectorGUI(tk.Tk):
     def add_supabase_prompt(self, prompt_key, prompt_text):
         token_count = len(prompt_text) // 4
         self.prompts_data[prompt_key] = {"path": None, "content": prompt_text, "tokens": token_count}
-        current = self.available_prompts_box.get(0, tk.END)
-        if prompt_key not in current:
+        # If not in either list, add to "available" 
+        if prompt_key not in self.available_prompts_box.get(0, tk.END) \
+           and prompt_key not in self.selected_prompts_box.get(0, tk.END):
             self.available_prompts_box.insert(tk.END, prompt_key)
         self.update_token_count()
 
-    # -------------------------------------------------------------------------
+    # ----------------------------------------------------------------------
     # Prompts logic
-    # -------------------------------------------------------------------------
+    # ----------------------------------------------------------------------
     def add_prompt(self):
         selection = self.available_prompts_box.curselection()
         for index in selection[::-1]:
@@ -686,12 +743,13 @@ class FileSelectorGUI(tk.Tk):
         for index in selection[::-1]:
             fname = self.selected_prompts_box.get(index)
             self.selected_prompts_box.delete(index)
-            self.available_prompts_box.insert(tk.END, fname)
+            # Insert back into available, keep it sorted
             items = list(self.available_prompts_box.get(0, tk.END))
+            items.append(fname)
             items.sort()
             self.available_prompts_box.delete(0, tk.END)
-            for item in items:
-                self.available_prompts_box.insert(tk.END, item)
+            for it in items:
+                self.available_prompts_box.insert(tk.END, it)
         self.update_token_count()
     
     def move_prompt_up(self):
@@ -734,14 +792,15 @@ class FileSelectorGUI(tk.Tk):
         total = total_file_tokens + total_prompt_tokens
         self.token_label.config(text=f"Estimated Tokens: {total}")
 
-    # -------------------------------------------------------------------------
+    # ----------------------------------------------------------------------
     # Save / Load configuration
-    # -------------------------------------------------------------------------
+    # ----------------------------------------------------------------------
     def save_configuration(self):
         config = {
             'excluded_paths': list(self.excluded_paths),
             'selected_files': [p for p, var in self.file_vars.items() if var.get()],
-            'selected_dirs': [p for p, var in self.dir_vars.items() if var.get()]
+            'selected_dirs': [p for p, var in self.dir_vars.items() if var.get()],
+            'selected_prompts': list(self.selected_prompts_box.get(0, tk.END)),
         }
         try:
             with open(self.context_file, 'w', encoding='utf-8') as f:
@@ -751,18 +810,17 @@ class FileSelectorGUI(tk.Tk):
             messagebox.showerror("Error", f"Failed to save configuration: {str(e)}")
             
     def load_configuration(self):
+        """Load the config, reset everything, expand root + children, apply states."""
         try:
             with open(self.context_file, 'r', encoding='utf-8') as f:
                 config = json.load(f)
 
-            # Reset everything
-            for var in self.exclusion_vars.values():
-                var.set(False)
-            for var in self.dir_vars.values():
-                var.set(False)
-            for var in self.file_vars.values():
-                var.set(False)
+            # 1) Clear everything
+            self.clear_all()
+            # 2) Expand one level so we can see root + immediate children
+            self.expand_root_one_level()
 
+            # 3) Now set states from the config
             for p in config.get('excluded_paths', []):
                 if p in self.exclusion_vars:
                     self.exclusion_vars[p].set(True)
@@ -775,25 +833,35 @@ class FileSelectorGUI(tk.Tk):
                 if fpath in self.file_vars:
                     self.file_vars[fpath].set(True)
 
-            # Refresh visible portion
+            # 4) Restore selected prompts
+            for sp in config.get('selected_prompts', []):
+                if sp in self.prompts_data:  # Must exist in known prompts
+                    if sp in self.available_prompts_box.get(0, tk.END):
+                        idx = list(self.available_prompts_box.get(0, tk.END)).index(sp)
+                        self.available_prompts_box.delete(idx)
+                    if sp not in self.selected_prompts_box.get(0, tk.END):
+                        self.selected_prompts_box.insert(tk.END, sp)
+
+            # 5) Refresh so appearance matches
             for item_id in self.tree.get_children():
                 self.refresh_subtree(item_id)
 
+            # 6) Update token count
             self.update_token_count()
             messagebox.showinfo("Success", "Configuration loaded successfully!")
         except Exception as e:
             messagebox.showerror("Error", f"Failed to load configuration: {str(e)}")
 
-    # -------------------------------------------------------------------------
-    # Output Generation
-    # -------------------------------------------------------------------------
+    # ----------------------------------------------------------------------
+    # Generate Output
+    # ----------------------------------------------------------------------
     def generate_output(self):
         output_file = os.path.join(self.base_path, 'output.txt')
         selected_files = self.get_selected_files()
         
         try:
             with open(output_file, 'w', encoding='utf-8') as outfile:
-                # Presaved prompts (no "Selected Presaved Prompts:" line, no "Prompt: ...")
+                # Presaved prompts
                 if self.selected_prompts_box.size() > 0:
                     for fname in self.selected_prompts_box.get(0, tk.END):
                         prompt_data = self.prompts_data.get(fname)
@@ -825,9 +893,9 @@ class FileSelectorGUI(tk.Tk):
             messagebox.showerror("Error", f"Failed to generate output: {str(e)}")
         self.destroy()
 
-# -----------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 # Main
-# -----------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 if __name__ == "__main__":
     base_path = os.path.dirname(os.path.abspath(__file__))
     app = FileSelectorGUI(base_path)
